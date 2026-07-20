@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0a3161" />
+  <title>America 250 Food Tracker</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon-192.png" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">AMERICA 250</p>
+      <h1>Food & Wellness Tracker</h1>
+    </div>
+    <button id="installBtn" class="ghost" hidden>Install</button>
+  </header>
+
+  <nav class="tabs" aria-label="Sections">
+    <button class="tab active" data-tab="today">Today</button>
+    <button class="tab" data-tab="scan">Scan</button>
+    <button class="tab" data-tab="history">History</button>
+    <button class="tab" data-tab="shopping">Shopping</button>
+    <button class="tab" data-tab="supplements">Supplements</button>
+    <button class="tab" data-tab="settings">Settings</button>
+  </nav>
+
+  <main>
+    <section id="today" class="panel active">
+      <div class="hero-card">
+        <div>
+          <span>Calories</span>
+          <strong id="caloriesUsed">0</strong>
+          <small>of <span id="calorieGoalText">1800</span></small>
+        </div>
+        <div class="ring" id="calorieRing"><span id="calorieRemaining">1800</span><small>remaining</small></div>
+      </div>
+
+      <div class="metrics">
+        <article><span>Protein</span><strong id="proteinUsed">0 g</strong><small>Goal <span id="proteinGoalText">140</span> g</small></article>
+        <article><span>Fiber</span><strong id="fiberUsed">0 g</strong><small>Goal <span id="fiberGoalText">30</span> g</small></article>
+        <article><span>Water</span><strong id="waterUsed">0 oz</strong><small>Goal <span id="waterGoalText">90</span> oz</small></article>
+        <article><span>Weight</span><strong id="latestWeight">230 lb</strong><small>Starting 230 lb</small></article>
+      </div>
+
+      <div class="card">
+        <div class="section-title"><h2>Add Food</h2><button class="secondary" data-open-tab="scan">Scan barcode</button></div>
+        <form id="foodForm" class="form-grid">
+          <label>Date<input id="foodDate" type="date" required /></label>
+          <label>Meal<select id="meal"><option>Breakfast</option><option>Morning Snack</option><option>Lunch</option><option>Afternoon Snack</option><option>Dinner</option><option>Evening Snack</option><option>Drink</option></select></label>
+          <label class="wide">Food<input id="foodName" required placeholder="Chicken breast" /></label>
+          <label>Servings<input id="servings" type="number" min="0.1" step="0.1" value="1" required /></label>
+          <label>Calories / serving<input id="calories" type="number" min="0" step="1" value="0" required /></label>
+          <label>Protein (g)<input id="protein" type="number" min="0" step="0.1" value="0" /></label>
+          <label>Carbs (g)<input id="carbs" type="number" min="0" step="0.1" value="0" /></label>
+          <label>Fat (g)<input id="fat" type="number" min="0" step="0.1" value="0" /></label>
+          <label>Fiber (g)<input id="fiber" type="number" min="0" step="0.1" value="0" /></label>
+          <label class="wide">Notes<input id="foodNotes" placeholder="Optional" /></label>
+          <button type="submit" class="primary wide">Add to today</button>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="section-title"><h2>Today’s Food</h2><button id="clearToday" class="danger-text">Clear day</button></div>
+        <div id="todayList" class="list empty-state">No food logged yet.</div>
+      </div>
+
+      <div class="card two-col">
+        <form id="waterForm">
+          <h2>Add Water</h2>
+          <label>Ounces<input id="waterAmount" type="number" min="1" value="16" /></label>
+          <button class="primary" type="submit">Add water</button>
+        </form>
+        <form id="weightForm">
+          <h2>Log Weight</h2>
+          <label>Pounds<input id="weightAmount" type="number" min="1" step="0.1" value="230" /></label>
+          <button class="primary" type="submit">Save weight</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="scan" class="panel">
+      <div class="card">
+        <h2>Barcode Scanner</h2>
+        <p class="muted">Scan a UPC/EAN label. Products are looked up through Open Food Facts. Always verify the result against the package label.</p>
+        <video id="camera" playsinline muted></video>
+        <div class="button-row">
+          <button id="startScan" class="primary">Start camera</button>
+          <button id="stopScan" class="secondary" disabled>Stop</button>
+        </div>
+        <div class="divider"><span>or</span></div>
+        <form id="barcodeForm" class="inline-form">
+          <input id="barcodeInput" inputmode="numeric" placeholder="Enter UPC barcode" required />
+          <button class="primary" type="submit">Look up</button>
+        </form>
+        <p id="scanStatus" class="status"></p>
+      </div>
+      <div id="productCard" class="card" hidden>
+        <h2 id="productTitle">Product</h2>
+        <p id="productBrand" class="muted"></p>
+        <div class="nutrition-grid" id="nutritionGrid"></div>
+        <label>Meal<select id="scanMeal"><option>Breakfast</option><option>Morning Snack</option><option>Lunch</option><option>Afternoon Snack</option><option>Dinner</option><option>Evening Snack</option><option>Drink</option></select></label>
+        <label>Servings<input id="scanServings" type="number" min="0.1" step="0.1" value="1" /></label>
+        <button id="addScannedFood" class="primary full">Add to food log</button>
+      </div>
+    </section>
+
+    <section id="history" class="panel">
+      <div class="card">
+        <div class="section-title"><h2>Daily History</h2><button id="exportFoodCsv" class="secondary">Export CSV</button></div>
+        <div id="historyList" class="list empty-state">No history yet.</div>
+      </div>
+    </section>
+
+    <section id="shopping" class="panel">
+      <div class="card">
+        <h2>Shopping List</h2>
+        <form id="shoppingForm" class="form-grid">
+          <label class="wide">Item<input id="shopItem" required /></label>
+          <label>Quantity<input id="shopQty" value="1" /></label>
+          <label>Estimated cost<input id="shopEstimate" type="number" min="0" step="0.01" value="0" /></label>
+          <label>Actual cost<input id="shopActual" type="number" min="0" step="0.01" value="0" /></label>
+          <label>Store<select id="shopStore"><option>Kroger - Jasper, GA</option><option>GNC</option><option>Other</option></select></label>
+          <button type="submit" class="primary wide">Add item</button>
+        </form>
+        <div class="cost-summary"><span>Estimated <strong id="estimatedTotal">$0.00</strong></span><span>Actual <strong id="actualTotal">$0.00</strong></span></div>
+        <div id="shoppingList" class="list empty-state">Your shopping list is empty.</div>
+      </div>
+    </section>
+
+    <section id="supplements" class="panel">
+      <div class="card">
+        <h2>Supplement Tracker</h2>
+        <form id="supplementForm" class="form-grid">
+          <label class="wide">Supplement<input id="suppName" required placeholder="Vitamin D3" /></label>
+          <label>Dose<input id="suppDose" placeholder="1000 IU" /></label>
+          <label>Timing<input id="suppTiming" placeholder="With breakfast" /></label>
+          <label>Monthly cost<input id="suppCost" type="number" min="0" step="0.01" value="0" /></label>
+          <label>Doctor approved?<select id="suppApproved"><option>Not checked</option><option>Yes</option><option>No</option></select></label>
+          <label class="wide">Notes<input id="suppNotes" /></label>
+          <button type="submit" class="primary wide">Add supplement</button>
+        </form>
+        <p class="warning">Supplements can interact with medications or health conditions. Confirm doses with a clinician or pharmacist.</p>
+        <div id="supplementList" class="list empty-state">No supplements added.</div>
+      </div>
+    </section>
+
+    <section id="settings" class="panel">
+      <div class="card">
+        <h2>Goals</h2>
+        <form id="settingsForm" class="form-grid">
+          <label>Calories<input id="goalCalories" type="number" min="800" value="1800" /></label>
+          <label>Protein (g)<input id="goalProtein" type="number" min="0" value="140" /></label>
+          <label>Fiber (g)<input id="goalFiber" type="number" min="0" value="30" /></label>
+          <label>Water (oz)<input id="goalWater" type="number" min="0" value="90" /></label>
+          <button class="primary wide" type="submit">Save goals</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2>Backup & Restore</h2>
+        <p class="muted">Your data stays on this device unless you export it.</p>
+        <div class="button-stack">
+          <button id="exportJson" class="secondary">Export full backup</button>
+          <label class="file-button">Import backup<input id="importJson" type="file" accept="application/json" /></label>
+          <button id="resetApp" class="danger">Erase all app data</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Install on Phone</h2>
+        <p class="muted">Android: open in Chrome or Edge and choose Install app/Add to Home screen. iPhone: open in Safari, tap Share, then Add to Home Screen.</p>
+      </div>
+    </section>
+  </main>
+
+  <template id="rowTemplate"><article class="list-row"><div class="row-main"></div><button class="icon-btn" aria-label="Delete">×</button></article></template>
+  <script src="app.js"></script>
+</body>
+</html>
